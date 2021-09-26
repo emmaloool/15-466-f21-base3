@@ -15,6 +15,62 @@
 
 #include <random>
 
+
+// ---------- Load sound loop samples ----------
+
+Load< Sound::Sample > relaxing_ballad_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("relaxing_ballad.wav"));
+});
+
+Load< Sound::Sample > boss_theme_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("epic_boss_battle.wav"));
+});
+
+// ---------- Load instruction samples ----------
+
+// #### SINGLE SAMPLES
+Load< Sound::Sample > no_banana_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_banana.wav"));
+});
+
+Load< Sound::Sample > no_blueberry_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_blueberry.wav"));
+});
+
+Load< Sound::Sample > no_cantaloupe_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_cantaloupe.wav"));
+});
+
+Load< Sound::Sample > no_cherry_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_cherry.wav"));
+});
+
+Load< Sound::Sample > no_green_kiwi_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_green_kiwi.wav"));
+});
+
+Load< Sound::Sample > no_yellow_kiwi_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_yellow_kiwi.wav"));
+});
+
+Load< Sound::Sample > no_honeydew_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_honeydew.wav"));
+});
+
+Load< Sound::Sample > no_red_dragonfruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_red_dragonfruit.wav"));
+});
+
+Load< Sound::Sample > no_white_dragonfruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_white_dragonfruit.wav"));
+});
+
+Load< Sound::Sample > no_watermelon_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/single/no_watermelon.wav"));
+});
+
+
+
 GLuint tart_meshes_for_lit_color_texture_program = 0;
 Load< MeshBuffer > tart_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer const *ret = new MeshBuffer(data_path("tart.pnct"));
@@ -39,100 +95,118 @@ Load< Scene > tart_scene(LoadTagDefault, []() -> Scene const * {
 	});
 });
 
-// ---------- Load the various sound samples ----------
-Load< Sound::Sample > relaxing_ballad_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("relaxing_ballad.wav"));
-});
-
 BakeryMode::BakeryMode() : scene(*tart_scene) {
-	// Helper to setup fruit
-	auto setup_fruit = [this](FruitType type, Scene::Transform &transform, std::string name) {
-		Fruit fruit;
-		fruit.name = name;
-		fruit.type = type;
-		fruit.available = true;
-		fruit.staged = false;
-		fruit.ready = false;
-		fruit.transform = &transform;
-		fruit.init_position = transform.position;
-		fruit.dest_position = glm::vec3(0);
-		fruits.push_back(fruit);
-		seen_fruits[type] = true;
-	};
-
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
 
-	// Get pointers to tart shell transforms for convenience
-	for (auto &transform : scene.transforms) {
-		if (transform.name == "TartBase") {
-			tart.base = &transform;
+	// ----- Setup scene -----
+	{
+		// Helper to setup fruit
+		auto setup_fruit = [this](FruitType type, Scene::Transform &transform, std::string name) {
+			Fruit fruit;
+			fruit.name = name;
+			fruit.type = type;
+			fruit.available = true;
+			fruit.staged = false;
+			fruit.ready = false;
+			fruit.transform = &transform;
+			fruit.init_position = transform.position;
+			fruit.dest_position = glm::vec3(0);
+			fruits.push_back(fruit);
+			seen_fruits[type] = true;
+		};
+
+		// Get pointers to tart shell transforms for convenience
+		for (auto &transform : scene.transforms) {
+			if (transform.name == "TartBase") {
+				tart.base = &transform;
+			}
+			else if (transform.name == "TartShell") {
+				tart.rim = &transform;
+			}
+			else if (transform.name == "TartCream") {
+				tart.cream = &transform;
+			}
+			else if (transform.name == "Cherry") {
+				setup_fruit(Cherry, transform, "Cherry");
+			}
+			else if (transform.name == "Blueberry") {
+				setup_fruit(Blueberry, transform, "Blueberry");
+			}
+			else if (transform.name == "Banana") {
+				setup_fruit(Banana, transform, "Banana");
+			}
+			else if (transform.name == "GreenKiwi") {
+				setup_fruit(GreenKiwi, transform, "Green Kiwi");
+			}
+			else if (transform.name == "YellowKiwi") {
+				setup_fruit(YellowKiwi, transform, "Yellow Kiwi");
+			}
+			else if (transform.name == "Honeydew") {
+				setup_fruit(Honeydew, transform, "Honeydew");
+			}
+			else if (transform.name == "Cantaloupe") {
+				setup_fruit(Cantaloupe, transform, "Cantaloupe");
+			}
+			else if (transform.name == "Watermelon") {
+				setup_fruit(Watermelon, transform, "Watermelon");
+			}
+			else if (transform.name == "WhiteDragonFruit") {
+				setup_fruit(WhiteDragonFruit, transform, "White Dragon Fruit");
+			}
+			else if (transform.name == "RedDragonFruit") {
+				setup_fruit(RedDragonFruit, transform, "Red Dragon Fruit");
+			}
 		}
-		else if (transform.name == "TartShell") {
-			tart.rim = &transform;
+
+		// Check that all meshes were loaded from the scene
+		{
+			if (tart.base == nullptr) throw std::runtime_error("Tart shell base not found.");
+			if (tart.rim == nullptr) throw std::runtime_error("Tart shell rim not found.");
+			if (tart.cream == nullptr) throw std::runtime_error("Tart pastry cream not found.");
+			if (seen_fruits[Cherry] == false) throw std::runtime_error("Cherry not found.");
+			if (seen_fruits[Blueberry] == false) throw std::runtime_error("Blueberry not found.");
+			if (seen_fruits[Banana] == false) throw std::runtime_error("Banana not found.");
+			if (seen_fruits[GreenKiwi] == false) throw std::runtime_error("GreenKiwi not found.");
+			if (seen_fruits[YellowKiwi] == false) throw std::runtime_error("YellowKiwi not found.");
+			if (seen_fruits[Honeydew] == false) throw std::runtime_error("Honeydew not found.");
+			if (seen_fruits[Cantaloupe] == false) throw std::runtime_error("Cantaloupe not found.");
+			if (seen_fruits[Watermelon] == false) throw std::runtime_error("Watermelon not found.");
+			if (seen_fruits[WhiteDragonFruit] == false) throw std::runtime_error("WhiteDragonFruit not found.");
+			if (seen_fruits[RedDragonFruit] == false) throw std::runtime_error("RedDragonFruit not found.");
 		}
-		else if (transform.name == "TartCream") {
-			tart.cream = &transform;
-		}
-		else if (transform.name == "Cherry") {
-			setup_fruit(Cherry, transform, "Cherry");
-		}
-		else if (transform.name == "Blueberry") {
-			setup_fruit(Blueberry, transform, "Blueberry");
-		}
-		else if (transform.name == "Banana") {
-			setup_fruit(Banana, transform, "Banana");
-		}
-		else if (transform.name == "GreenKiwi") {
-			setup_fruit(GreenKiwi, transform, "Green Kiwi");
-		}
-		else if (transform.name == "YellowKiwi") {
-			setup_fruit(YellowKiwi, transform, "Yellow Kiwi");
-		}
-		else if (transform.name == "Honeydew") {
-			setup_fruit(Honeydew, transform, "Honeydew");
-		}
-		else if (transform.name == "Cantaloupe") {
-			setup_fruit(Cantaloupe, transform, "Cantaloupe");
-		}
-		else if (transform.name == "Watermelon") {
-			setup_fruit(Watermelon, transform, "Watermelon");
-		}
-		else if (transform.name == "WhiteDragonFruit") {
-			setup_fruit(WhiteDragonFruit, transform, "White Dragon Fruit");
-		}
-		else if (transform.name == "RedDragonFruit") {
-			setup_fruit(RedDragonFruit, transform, "Red Dragon Fruit");
+
+		// Initialize "floor" level + hidden position
+		tart_base_depth = tart.base->position.z;
+		hidden_fruit_pos = glm::vec3(0.0f, 0.0f, tart_base_depth - 10.0f);
+
+		// "Hide" all loaded fruits
+		for (auto &fruit : fruits) {
+			fruit.transform->position = hidden_fruit_pos;
 		}
 	}
 
-	if (tart.base == nullptr) throw std::runtime_error("Tart shell base not found.");
-	if (tart.rim == nullptr) throw std::runtime_error("Tart shell rim not found.");
-	if (tart.cream == nullptr) throw std::runtime_error("Tart pastry cream not found.");
-	if (tart.base == nullptr) throw std::runtime_error("Tart shell rim not found.");
-	if (seen_fruits[Cherry] == false) throw std::runtime_error("Cherry not found.");
-	if (seen_fruits[Blueberry] == false) throw std::runtime_error("Blueberry not found.");
-	if (seen_fruits[Banana] == false) throw std::runtime_error("Banana not found.");
-	if (seen_fruits[GreenKiwi] == false) throw std::runtime_error("GreenKiwi not found.");
-	if (seen_fruits[YellowKiwi] == false) throw std::runtime_error("YellowKiwi not found.");
-	if (seen_fruits[Honeydew] == false) throw std::runtime_error("Honeydew not found.");
-	if (seen_fruits[Cantaloupe] == false) throw std::runtime_error("Cantaloupe not found.");
-	if (seen_fruits[Watermelon] == false) throw std::runtime_error("Watermelon not found.");
-	if (seen_fruits[WhiteDragonFruit] == false) throw std::runtime_error("WhiteDragonFruit not found.");
-	if (seen_fruits[RedDragonFruit] == false) throw std::runtime_error("RedDragonFruit not found.");
+	// ----- Setup audio -----
+	{
+		single_no_samples[Banana] = &no_banana_sample;
+		single_no_samples[Blueberry] = &no_blueberry_sample;
+		single_no_samples[Cantaloupe] = &no_cantaloupe_sample;
+		single_no_samples[Cherry] = &no_cherry_sample;
+		single_no_samples[GreenKiwi] = &no_green_kiwi_sample;
+		single_no_samples[YellowKiwi] = &no_yellow_kiwi_sample;
+		single_no_samples[Honeydew] = &no_honeydew_sample;
+		single_no_samples[RedDragonFruit] = &no_red_dragonfruit_sample;
+		single_no_samples[WhiteDragonFruit] = &no_white_dragonfruit_sample;
+		single_no_samples[Watermelon] = &no_watermelon_sample;
 
-	// Initialize "floor" level + hidden position
-	tart_base_depth = tart.base->position.z;
-	hidden_fruit_pos = glm::vec3(0.0f, 0.0f, tart_base_depth - 10.0f);
-
-	// "Hide" all loaded fruits
-	for (auto &fruit : fruits) {
-		fruit.transform->position = hidden_fruit_pos;
+		// Start looping bg music
+		relaxing_loop = Sound::loop_3D(*relaxing_ballad_sample, 1.0f, tart.base->position, 5.0f);
+		boss_loop = Sound::loop_3D(*boss_theme_sample, 0.0f, tart.base->position, 5.0f);
 	}
 
-	// Start looping the casual music sound
-	relaxing_loop = Sound::loop_3D(*relaxing_ballad_sample, 1.0f, tart.base->position, 5.0f);
+	// Fill presence state to indicate no fruits have been placed
+	fruit_presence.fill(false);
 }
 
 BakeryMode::~BakeryMode() {
@@ -195,59 +269,21 @@ bool BakeryMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 				placed_fruit_indices.pop();
 				current_fruit_index = placed_index;
 				Fruit &last_fruit = fruits[placed_index];
+				fruit_presence[last_fruit.type] = false;	// removed presence of this previously placed fruit
 				load_fruit(last_fruit);
 				num_fruit--;
+
+				// {
+				// 	std::cout << "Presence: [";
+				// 	for (size_t p_ind = 0; p_ind < max_fruit; p_ind++) {
+				// 		std::cout << fruits_names[p_ind] << "=" << (int)(fruit_presence[p_ind]) << ",";
+				// 	}
+				// 	std::cout << "]" <<std::endl;
+				// }
 			}
 			return true;
 		}
-
-		// Handle camera movement
-		else if (evt.key.keysym.sym == SDLK_RETURN) {
-			if (SDL_GetRelativeMouseMode() == SDL_FALSE) {
-				SDL_SetRelativeMouseMode(SDL_TRUE);
-				return true;
-			}
-		}
-		else if (evt.key.keysym.sym == SDLK_ESCAPE) {
-			SDL_SetRelativeMouseMode(SDL_FALSE);
-			return true;			
-		} else if (evt.key.keysym.sym == SDLK_LEFT) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RIGHT) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_UP) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
-			down.downs += 1;
-			down.pressed = true;
-			return true;
-		}
-
 	} 
-
-	// Handle camera movement some more
-	else if (evt.type == SDL_KEYUP) {
-		
-		if (evt.key.keysym.sym == SDLK_LEFT) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RIGHT) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_UP) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
-			down.pressed = false;
-			return true;
-		}
-	}
 	
 	else if (evt.type == SDL_MOUSEBUTTONDOWN) {
 		
@@ -291,34 +327,21 @@ bool BakeryMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 			current_fruit.ready = true;
 		}
 		return true;
-	} 
-	
-	else if (evt.type == SDL_MOUSEMOTION) {
-		if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
-			glm::vec2 motion = glm::vec2(
-				evt.motion.xrel / float(window_size.y),
-				-evt.motion.yrel / float(window_size.y)
-			);
-			camera->transform->rotation = glm::normalize(
-				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
-			);
-			return true;
-		}
 	}
 	
 	return false;
 }
 
 void BakeryMode::update(float elapsed) {
-	game_time += elapsed;
-	if (game_time > 10.0f && game_time <= 20.0f) {
-		relaxing_loop->set_volume(0.0f, 1.0f/60.0f);
-	}
-	else if (game_time > 20.0f) {
-		relaxing_loop->set_volume(1.0f, 1.0f/60.0f);
-	}
+	time += elapsed;
+	// if (game_time > 10.0f && game_time <= 20.0f) {
+	// 	relaxing_loop->set_volume(0.0f, 5.0f/60.0f);
+	// 	boss_loop->set_volume(1.0f, 5.0f/60.0f);
+	// }
+	// else if (game_time > 20.0f) {
+	// 	relaxing_loop->set_volume(1.0f, 5.0f/60.0f);
+	// 	boss_loop->set_volume(0.0f, 5.0f/60.0f);
+	// }
 
 	Fruit &current_fruit = fruits[current_fruit_index];
 
@@ -335,34 +358,22 @@ void BakeryMode::update(float elapsed) {
 			fruits[current_fruit_index].available = false;
 			fruits[current_fruit_index].staged = false;
 			fruits[current_fruit_index].ready = false;
+			fruit_presence[current_fruit.type] = true;
 
-			num_fruit++;	// Update number of placed fruit
+			// {
+			// 	std::cout << "Presence: [";
+			// 	for (size_t p_ind = 0; p_ind < max_fruit; p_ind++) {
+			// 		std::cout << fruits_names[p_ind] << "=" << (int)(fruit_presence[p_ind]) << ",";
+			// 	}
+			// 	std::cout << "]" <<std::endl;
+			// }
+
+			num_fruit++;	
 			get_next_available_index();
 		}
 		else {	// no collision, apply timestep movement 
 			current_fruit.transform->position += speed * elapsed * glm::normalize(current_fruit.dest_position - current_fruit.transform->position);
 		}
-	}
-
-	//move camera:
-	{
-		//combine inputs into a move:
-		constexpr float PlayerSpeed = 30.0f;
-		glm::vec2 move = glm::vec2(0.0f);
-		if (left.pressed && !right.pressed) move.x =-1.0f;
-		if (!left.pressed && right.pressed) move.x = 1.0f;
-		if (down.pressed && !up.pressed) move.y =-1.0f;
-		if (!down.pressed && up.pressed) move.y = 1.0f;
-
-		//make it so that moving diagonally doesn't go faster:
-		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
-
-		glm::mat4x3 frame = camera->transform->make_local_to_parent();
-		glm::vec3 right = frame[0];
-		//glm::vec3 up = frame[1];
-		glm::vec3 forward = -frame[2];
-
-		camera->transform->position += move.x * right + move.y * forward;
 	}
 
 	//reset button press counters
@@ -408,27 +419,14 @@ void BakeryMode::draw(glm::uvec2 const &drawable_size) {
 		));
 
 		constexpr float H = 0.09f;
-		if (num_fruit == max_fruit) {
-			lines.draw_text("You finished the tart! :)",
+		lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
 				glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
 				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 				glm::u8vec4(0x00, 0x00, 0x00, 0x00));
 			float ofs = 2.0f / drawable_size.y;
-			lines.draw_text("You finished the tart! :)",
+		lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
 				glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
 				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 				glm::u8vec4(0xff, 0xff, 0xff, 0x00));
-		}
-		else {
-			lines.draw_text("Current Fruit: " + fruits[current_fruit_index].name + ", # Fruits Placed: " + std::to_string(num_fruit),
-				glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-				glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-			float ofs = 2.0f / drawable_size.y;
-			lines.draw_text("Current Fruit: " + fruits[current_fruit_index].name + ", # Fruits Placed: " + std::to_string(num_fruit),
-				glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-				glm::u8vec4(0xff, 0xff, 0xff, 0x00));
-		}
 	}
 }

@@ -2,6 +2,7 @@
 
 #include "Scene.hpp"
 #include "Sound.hpp"
+#include "Load.hpp"
 
 #include <glm/glm.hpp>
 
@@ -44,6 +45,9 @@ struct BakeryMode : Mode {
 		RedDragonFruit = 9
 	} FruitType;
 
+	// for debugging
+	std::string fruits_names[10] = {"Cherry", "Blueberry", "Banana", "GreenKiwi", "YellowKiwi", "Honeydew", "Cantaloupe", "Watermelon", "WhiteDragonFruit", "RedDragonFruit"};
+
 	// Wrapper for instances of various fruit objects
 	struct Fruit {
 		std::string name; 		// For display purposes
@@ -84,9 +88,25 @@ struct BakeryMode : Mode {
 	//camera:
 	Scene::Camera *camera = nullptr;
 
-	// Sounds
+	// ---------------------------- Sounds ----------------------------
+	// Looping sounds (set up ambience)
 	std::shared_ptr<Sound::PlayingSample> relaxing_loop;
+	std::shared_ptr<Sound::PlayingSample> boss_loop;
 
-	// Time
-	float game_time = 0.0f;
+	Load<Sound::Sample> *single_no_samples[max_fruit];
+
+	// std::array<bool, max_fruit>conditions;
+	std::array<bool, max_fruit>fruit_presence;
+
+	uint8_t cur_instr_i = 0;
+
+	const float RECOVERY_TIME = 5.0f;
+	const float INSTRUCT_TIME = 4.0f;
+	float MOVE_TIME = 5.0f;
+
+	// Track total elapsed time between iteration phases
+	float time = 0.0f;
+
+	// Game score
+	uint8_t score = 0;
 };
