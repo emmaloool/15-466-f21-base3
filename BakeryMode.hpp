@@ -99,14 +99,23 @@ struct BakeryMode : Mode {
 	std::array<bool, max_fruit>fruit_presence;
 
 	uint8_t cur_instr_i = 0;
+	uint8_t instr_ct = 0;
 
-	const float RECOVERY_TIME = 5.0f;
-	const float INSTRUCT_TIME = 4.0f;
-	float MOVE_TIME = 5.0f;
+	enum Phase {
+		RECOVERY, 
+		INSTRUCT,
+		MOVE
+	};
+	Phase phase = RECOVERY;
+
+	const float RECOVERY_TIME = 10.0f;
+	const float INSTRUCT_TIME = 5.0f;
+	float MOVE_TIME = 10.0f;
 
 	// Track total elapsed time between iteration phases
-	float time = 0.0f;
+	float time = -5.0f;		// start earlier than 0 to test
 
 	// Game score
-	uint8_t score = 0;
+	int8_t score = 0;
+	bool game_over = false;
 };

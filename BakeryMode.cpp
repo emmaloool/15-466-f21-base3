@@ -70,7 +70,6 @@ Load< Sound::Sample > no_watermelon_sample(LoadTagDefault, []() -> Sound::Sample
 });
 
 
-
 GLuint tart_meshes_for_lit_color_texture_program = 0;
 Load< MeshBuffer > tart_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer const *ret = new MeshBuffer(data_path("tart.pnct"));
@@ -334,55 +333,78 @@ bool BakeryMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 
 void BakeryMode::update(float elapsed) {
 	time += elapsed;
-	// if (game_time > 10.0f && game_time <= 20.0f) {
-	// 	relaxing_loop->set_volume(0.0f, 5.0f/60.0f);
-	// 	boss_loop->set_volume(1.0f, 5.0f/60.0f);
-	// }
-	// else if (game_time > 20.0f) {
-	// 	relaxing_loop->set_volume(1.0f, 5.0f/60.0f);
-	// 	boss_loop->set_volume(0.0f, 5.0f/60.0f);
-	// }
-
-	Fruit &current_fruit = fruits[current_fruit_index];
-
-	// Once a fruit gets marked as ready, it's in the process of being thrown
-	if (current_fruit.ready) {
-		// Collision is tested by checking magnitude of penetration against collision delta
-		// If collision occurs, delete the fruit from the scene + update current fruit
-		if (glm::length(current_fruit.transform->position - current_fruit.dest_position) < collision_delta) {
-
-			placed_fruit_indices.push(current_fruit_index);		// Add placement to tracker
-
-			// Reset current fruit 
-			// IMPORTANT: New current fruits start off as available, unstaged, and unready
-			fruits[current_fruit_index].available = false;
-			fruits[current_fruit_index].staged = false;
-			fruits[current_fruit_index].ready = false;
-			fruit_presence[current_fruit.type] = true;
-
-			// {
-			// 	std::cout << "Presence: [";
-			// 	for (size_t p_ind = 0; p_ind < max_fruit; p_ind++) {
-			// 		std::cout << fruits_names[p_ind] << "=" << (int)(fruit_presence[p_ind]) << ",";
-			// 	}
-			// 	std::cout << "]" <<std::endl;
-			// }
-
-			num_fruit++;	
-			get_next_available_index();
-		}
-		else {	// no collision, apply timestep movement 
-			current_fruit.transform->position += speed * elapsed * glm::normalize(current_fruit.dest_position - current_fruit.transform->position);
-		}
-	}
-
-	//reset button press counters
+	
+	// Handle fruit throwing 
 	{
-		left.downs = 0;
-		right.downs = 0;
-		up.downs = 0;
-		down.downs = 0;
+		Fruit &current_fruit = fruits[current_fruit_index];
+
+		// Once a fruit gets marked as ready, it's in the process of being thrown
+		if (current_fruit.ready) {
+			// Collision is tested by checking magnitude of penetration against collision delta
+			// If collision occurs, delete the fruit from the scene + update current fruit
+			if (glm::length(current_fruit.transform->position - current_fruit.dest_position) < collision_delta) {
+
+				placed_fruit_indices.push(current_fruit_index);		// Add placement to tracker
+
+				// Reset current fruit 
+				// IMPORTANT: New current fruits start off as available, unstaged, and unready
+				fruits[current_fruit_index].available = false;
+				fruits[current_fruit_index].staged = false;
+				fruits[current_fruit_index].ready = false;
+				fruit_presence[current_fruit.type] = true;
+
+				// {
+				// 	std::cout << "Presence: [";
+				// 	for (size_t p_ind = 0; p_ind < max_fruit; p_ind++) {
+				// 		std::cout << fruits_names[p_ind] << "=" << (int)(fruit_presence[p_ind]) << ",";
+				// 	}
+				// 	std::cout << "]" <<std::endl;
+				// }
+
+				num_fruit++;	
+				get_next_available_index();
+			}
+			else {	// no collision, apply timestep movement 
+				current_fruit.transform->position += speed * elapsed * glm::normalize(current_fruit.dest_position - current_fruit.transform->position);
+			}
+		}
 	}
+
+	// Handle phase events
+	{
+		if ((phase == RECOVERY) && (time >= RECOVERY_TIME)) {
+			time = 0.0f;
+			phase = INSTRUCT;
+			
+			// Play next instruction
+			cur_instr_i = instr_ct;
+			relaxing_loop->set_volume(0.0f, 10.0/60.0f);
+			Sound::play(*(*(single_no_samples[cur_instr_i])), 1.0f, 0.0f);
+			instr_ct++;
+		}	// Do nothing while in recovery period
+		else if ((phase == INSTRUCT) && (time >= INSTRUCT_TIME)) {
+			time = 0.0f;
+			phase = MOVE;
+			
+			// Play stressful music during move time
+			boss_loop->set_volume(1.0f, 5.0/60.0f);
+		}	// Do nothing while instructions are being read
+		else if ((phase == MOVE) && (time >= MOVE_TIME)){
+			time = 0.0f;
+			phase = RECOVERY;
+
+			// Move's over, resume peaceful music
+			boss_loop->set_volume(0.0f, 10.0f/60.0f);
+			relaxing_loop->set_volume(1.0f, 5.0/60.0f);
+
+			// Check presence against instruction's conditions
+			// TODO: check for type of instruction, or otherwise encode condition with sample
+			if (fruit_presence[cur_instr_i]) score -= 5;
+		}
+	}
+	// if (cur_instr_i < max_fruit) {		// have some sort of barrier to prevent further moves after game over
+	// 	game_over = true;
+	// }
 }
 
 void BakeryMode::draw(glm::uvec2 const &drawable_size) {
