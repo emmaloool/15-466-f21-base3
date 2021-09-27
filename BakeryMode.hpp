@@ -23,12 +23,6 @@ struct BakeryMode : Mode {
 
 	//----- game state -----
 
-	//input tracking:
-	struct Button {
-		uint8_t downs = 0;
-		uint8_t pressed = 0;
-	} left, right, down, up;
-
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
 
@@ -93,10 +87,10 @@ struct BakeryMode : Mode {
 	std::shared_ptr<Sound::PlayingSample> relaxing_loop;
 	std::shared_ptr<Sound::PlayingSample> boss_loop;
 
-	static const uint8_t count = 14;
+	static const uint8_t num_insts = 8;
 	struct InstructReqs {
-		Load<Sound::Sample> *samples[count];
-		std::array<std::array<int8_t, max_fruit>, count> requirements;
+		std::vector<Load<Sound::Sample> *> samples;
+		std::vector<std::array<int8_t, max_fruit>> requirements;
 	};
 	InstructReqs instructions;
 
@@ -112,14 +106,15 @@ struct BakeryMode : Mode {
 	};
 	Phase phase = RECOVERY;
 
-	const float RECOVERY_TIME = 2.0f;//5.0f;
-	const float INSTRUCT_TIME = 2.0f;//3.0f;
-	float MOVE_TIME = 2.0f;//8.0f;
+	const float RECOVERY_TIME = 5.0f;
+	const float INSTRUCT_TIME = 3.0f;
+	float MOVE_TIME = 8.0f;
 
 	// Track total elapsed time between iteration phases
-	float time = 0.0f;//-2.0f;		// start earlier than 0 to test
+	float time = -2.0f;		// start earlier than 0 to test
 
-	// Game score
+	// Overall game tracking state
 	int8_t score = 0;
 	bool game_over = false;
+
 };
