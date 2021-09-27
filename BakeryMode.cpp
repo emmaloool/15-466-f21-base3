@@ -28,7 +28,7 @@ Load< Sound::Sample > boss_theme_sample(LoadTagDefault, []() -> Sound::Sample co
 
 // ---------- Load instruction samples ----------
 
-// #### SINGLE SAMPLES
+// ############ SINGLE SAMPLES ############
 Load< Sound::Sample > no_banana_sample(LoadTagDefault, []() -> Sound::Sample const * {
 	return new Sound::Sample(data_path("commands/single/no_banana.wav"));
 });
@@ -68,6 +68,68 @@ Load< Sound::Sample > no_white_dragonfruit_sample(LoadTagDefault, []() -> Sound:
 Load< Sound::Sample > no_watermelon_sample(LoadTagDefault, []() -> Sound::Sample const * {
 	return new Sound::Sample(data_path("commands/single/no_watermelon.wav"));
 });
+
+// ############ MULTIPLE SAMPLES ############
+
+// ------ no samples ------
+Load< Sound::Sample > no_berries_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_berries.wav"));
+});
+
+Load< Sound::Sample > no_dragonfruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_dragonfruit.wav"));
+});
+
+Load< Sound::Sample > no_kiwis_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_kiwis.wav"));
+});
+
+Load< Sound::Sample > no_melons_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_melons.wav"));
+});
+
+Load< Sound::Sample > no_red_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_red_fruit.wav"));
+});
+
+Load< Sound::Sample > no_yellow_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_yellow_fruit.wav"));
+});
+
+Load< Sound::Sample > no_green_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/no_green_fruit.wav"));
+});
+
+// ------ yes samples ------
+
+Load< Sound::Sample > yes_berries_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_berries.wav"));
+});
+
+Load< Sound::Sample > yes_dragonfruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_dragonfruit.wav"));
+});
+
+Load< Sound::Sample > yes_kiwis_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_kiwis.wav"));
+});
+
+Load< Sound::Sample > yes_melons_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_melons.wav"));
+});
+
+Load< Sound::Sample > yes_red_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_red_fruit.wav"));
+});
+
+Load< Sound::Sample > yes_yellow_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_yellow_fruit.wav"));
+});
+
+Load< Sound::Sample > yes_green_fruit_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("commands/multiple/yes_green_fruit.wav"));
+});
+
 
 
 GLuint tart_meshes_for_lit_color_texture_program = 0;
@@ -188,16 +250,54 @@ BakeryMode::BakeryMode() : scene(*tart_scene) {
 
 	// ----- Setup audio -----
 	{
-		single_no_samples[Banana] = &no_banana_sample;
-		single_no_samples[Blueberry] = &no_blueberry_sample;
-		single_no_samples[Cantaloupe] = &no_cantaloupe_sample;
-		single_no_samples[Cherry] = &no_cherry_sample;
-		single_no_samples[GreenKiwi] = &no_green_kiwi_sample;
-		single_no_samples[YellowKiwi] = &no_yellow_kiwi_sample;
-		single_no_samples[Honeydew] = &no_honeydew_sample;
-		single_no_samples[RedDragonFruit] = &no_red_dragonfruit_sample;
-		single_no_samples[WhiteDragonFruit] = &no_white_dragonfruit_sample;
-		single_no_samples[Watermelon] = &no_watermelon_sample;
+		// instructions.samples[Banana] = &no_banana_sample;
+		// instructions.samples[Blueberry] = &no_blueberry_sample;
+		// instructions.samples[Cantaloupe] = &no_cantaloupe_sample;
+		// instructions.samples[Cherry] = &no_cherry_sample;
+		// instructions.samples[GreenKiwi] = &no_green_kiwi_sample;
+		// instructions.samples[YellowKiwi] = &no_yellow_kiwi_sample;
+		// instructions.samples[Honeydew] = &no_honeydew_sample;
+		// instructions.samples[RedDragonFruit] = &no_red_dragonfruit_sample;
+		// instructions.samples[WhiteDragonFruit] = &no_white_dragonfruit_sample;
+		// instructions.samples[Watermelon] = &no_watermelon_sample;
+
+		instructions.samples[0] = &yes_berries_sample;
+		instructions.samples[1] = &yes_dragonfruit_sample;
+		instructions.samples[2] = &yes_kiwis_sample;
+		instructions.samples[3] = &yes_melons_sample;
+		instructions.samples[4] = &yes_red_fruit_sample;
+		instructions.samples[5] = &yes_yellow_fruit_sample;
+		instructions.samples[6] = &yes_green_fruit_sample;
+
+		instructions.samples[7] = &no_berries_sample;
+		instructions.samples[8] = &no_dragonfruit_sample;
+		instructions.samples[9] = &no_kiwis_sample;
+		instructions.samples[10] = &no_melons_sample;
+		instructions.samples[11] = &no_red_fruit_sample;
+		instructions.samples[12] = &no_yellow_fruit_sample;
+		instructions.samples[13] = &no_green_fruit_sample;
+		
+		for (uint8_t i = 0; i < count; i++) {
+			for (uint8_t j = 0; j < max_fruit; j++) {
+				instructions.requirements[i][j] = 0;
+			}
+		}
+
+		instructions.requirements[0][Cherry] = 1; instructions.requirements[0][Blueberry] = 1;
+		instructions.requirements[1][RedDragonFruit] = 1; instructions.requirements[1][WhiteDragonFruit] = 1;
+		instructions.requirements[2][GreenKiwi] = 1; instructions.requirements[2][YellowKiwi] = 1;
+		instructions.requirements[3][Cantaloupe] = 1; instructions.requirements[3][Honeydew] = 1; instructions.requirements[3][Watermelon] = 1;
+		instructions.requirements[4][Cherry] = 1; instructions.requirements[4][Watermelon] = 1; instructions.requirements[4][RedDragonFruit] = 1;
+		instructions.requirements[5][YellowKiwi] = 1; instructions.requirements[5][Banana] = 1;
+		instructions.requirements[6][GreenKiwi] = 1; instructions.requirements[6][Honeydew] = 1;
+
+		instructions.requirements[7][Cherry] = -1; instructions.requirements[7][Blueberry] = -1;
+		instructions.requirements[8][RedDragonFruit] = -1; instructions.requirements[8][WhiteDragonFruit] = -1;
+		instructions.requirements[9][GreenKiwi] = -1; instructions.requirements[9][YellowKiwi] = -1;
+		instructions.requirements[10][Cantaloupe] = -1; instructions.requirements[10][Honeydew] = -1; instructions.requirements[10][Watermelon] = -1;
+		instructions.requirements[11][Cherry] = -1; instructions.requirements[11][Watermelon] = -1; instructions.requirements[11][RedDragonFruit] = -1;
+		instructions.requirements[12][YellowKiwi] = -1; instructions.requirements[12][Banana] = -1;
+		instructions.requirements[13][GreenKiwi] = -1; instructions.requirements[13][Honeydew] = -1;
 
 		// Start looping bg music
 		relaxing_loop = Sound::loop_3D(*relaxing_ballad_sample, 1.0f, tart.base->position, 5.0f);
@@ -217,7 +317,7 @@ int8_t BakeryMode::get_next_available_index() {
 		if (fruits[next_temp].available) {
 			current_fruit_index = (uint8_t)next_temp;
 			return next_temp;
-		}
+		} 
 		next_temp = (next_temp + 1) % max_fruit;
 	}
 	return -1;
@@ -332,8 +432,11 @@ bool BakeryMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 }
 
 void BakeryMode::update(float elapsed) {
+	if (game_over) return;
+	if (instr_ct > 3) return;
+
 	time += elapsed;
-	
+
 	// Handle fruit throwing 
 	{
 		Fruit &current_fruit = fruits[current_fruit_index];
@@ -353,14 +456,6 @@ void BakeryMode::update(float elapsed) {
 				fruits[current_fruit_index].ready = false;
 				fruit_presence[current_fruit.type] = true;
 
-				// {
-				// 	std::cout << "Presence: [";
-				// 	for (size_t p_ind = 0; p_ind < max_fruit; p_ind++) {
-				// 		std::cout << fruits_names[p_ind] << "=" << (int)(fruit_presence[p_ind]) << ",";
-				// 	}
-				// 	std::cout << "]" <<std::endl;
-				// }
-
 				num_fruit++;	
 				get_next_available_index();
 			}
@@ -371,40 +466,55 @@ void BakeryMode::update(float elapsed) {
 	}
 
 	// Handle phase events
+	if (!game_over)
 	{
 		if ((phase == RECOVERY) && (time >= RECOVERY_TIME)) {
 			time = 0.0f;
 			phase = INSTRUCT;
 			
 			// Play next instruction
-			cur_instr_i = instr_ct;
-			relaxing_loop->set_volume(0.0f, 10.0/60.0f);
-			Sound::play(*(*(single_no_samples[cur_instr_i])), 1.0f, 0.0f);
-			instr_ct++;
+			relaxing_loop->set_volume(0.0f, 10.0f/60.0f);
+			Sound::play(*(*(instructions.samples[cur_instr_i])), 1.0f, 0.0f);
 		}	// Do nothing while in recovery period
+		
 		else if ((phase == INSTRUCT) && (time >= INSTRUCT_TIME)) {
 			time = 0.0f;
 			phase = MOVE;
 			
 			// Play stressful music during move time
-			boss_loop->set_volume(1.0f, 5.0/60.0f);
+			boss_loop->set_volume(1.0f, 5.0f/60.0f);
 		}	// Do nothing while instructions are being read
+
 		else if ((phase == MOVE) && (time >= MOVE_TIME)){
 			time = 0.0f;
 			phase = RECOVERY;
 
-			// Move's over, resume peaceful music
-			boss_loop->set_volume(0.0f, 10.0f/60.0f);
-			relaxing_loop->set_volume(1.0f, 5.0/60.0f);
-
 			// Check presence against instruction's conditions
-			// TODO: check for type of instruction, or otherwise encode condition with sample
-			if (fruit_presence[cur_instr_i]) score -= 5;
+			auto condition = instructions.requirements[cur_instr_i];
+			for (uint8_t i = 0; i < max_fruit; i++) {
+				if (fruit_presence[i]) {
+					if (condition[i] == 1) {
+						score += 5;
+					}
+					else if (condition[i] == -1) {
+						score -= 5;
+					}
+				}
+			}
+
+			// Move's over, resume peaceful mussic
+			boss_loop->set_volume(0.0f, 10.0f/60.0f);
+			relaxing_loop->set_volume(1.0f, 5.0f/60.0f);
+			
+			if (cur_instr_i < (count-1)) {
+				cur_instr_i++;
+			}
+			else {
+				game_over = true;
+			}
 		}
+
 	}
-	// if (cur_instr_i < max_fruit) {		// have some sort of barrier to prevent further moves after game over
-	// 	game_over = true;
-	// }
 }
 
 void BakeryMode::draw(glm::uvec2 const &drawable_size) {
@@ -441,14 +551,27 @@ void BakeryMode::draw(glm::uvec2 const &drawable_size) {
 		));
 
 		constexpr float H = 0.09f;
-		lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
-				glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-				glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-			float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
-				glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-				glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-				glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		if (game_over) {
+			lines.draw_text("GAME OVER - Your Score: " + std::to_string(score),
+					glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
+					glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+					glm::u8vec4(0x00, 0x00, 0x00, 0x00));
+				float ofs = 2.0f / drawable_size.y;
+			lines.draw_text("GAME OVER - Your Score: " + std::to_string(score),
+					glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
+					glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+					glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
+		else {
+			lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
+					glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
+					glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+					glm::u8vec4(0x00, 0x00, 0x00, 0x00));
+				float ofs = 2.0f / drawable_size.y;
+			lines.draw_text("Score: " + std::to_string(score) + "        Current Fruit: " + fruits[current_fruit_index].name,
+					glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
+					glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+					glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
 	}
 }

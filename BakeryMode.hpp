@@ -93,9 +93,13 @@ struct BakeryMode : Mode {
 	std::shared_ptr<Sound::PlayingSample> relaxing_loop;
 	std::shared_ptr<Sound::PlayingSample> boss_loop;
 
-	Load<Sound::Sample> *single_no_samples[max_fruit];
+	static const uint8_t count = 14;
+	struct InstructReqs {
+		Load<Sound::Sample> *samples[count];
+		std::array<std::array<int8_t, max_fruit>, count> requirements;
+	};
+	InstructReqs instructions;
 
-	// std::array<bool, max_fruit>conditions;
 	std::array<bool, max_fruit>fruit_presence;
 
 	uint8_t cur_instr_i = 0;
@@ -108,12 +112,12 @@ struct BakeryMode : Mode {
 	};
 	Phase phase = RECOVERY;
 
-	const float RECOVERY_TIME = 10.0f;
-	const float INSTRUCT_TIME = 5.0f;
-	float MOVE_TIME = 10.0f;
+	const float RECOVERY_TIME = 2.0f;//5.0f;
+	const float INSTRUCT_TIME = 2.0f;//3.0f;
+	float MOVE_TIME = 2.0f;//8.0f;
 
 	// Track total elapsed time between iteration phases
-	float time = -5.0f;		// start earlier than 0 to test
+	float time = 0.0f;//-2.0f;		// start earlier than 0 to test
 
 	// Game score
 	int8_t score = 0;
