@@ -105,9 +105,9 @@ struct BakeryMode : Mode {
 	};
 	Phase phase = RECOVERY;
 
-	const float RECOVERY_TIME = 5.0f;
+	const float RECOVERY_TIME = 7.5f;
 	const float INSTRUCT_TIME = 3.0f;
-	float MOVE_TIME = 8.2f;
+	float MOVE_TIME = 8.0f;
 
 	// Track total elapsed time between iteration phases
 	float time = -2.0f;		// start earlier than 0 to test

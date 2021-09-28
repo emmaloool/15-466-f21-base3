@@ -512,12 +512,16 @@ void BakeryMode::update(float elapsed) {
 				}
 			}
 
-			// Penalty: every piece that was removed in the process, that didn't need to be removed, incurs 2pt penalty
-			if (apply_penalty) {
-				for (uint8_t i = 0; i < max_fruit; i++) {
-					if (condition[i] != -1) {	// Want to inspect changes over this round for all other moves
-						if (prev_fruit_presence[i] && !fruit_presence[i]) { // present previously but currently removed
+			// Incentive putting fruits back after temporarily removing them to accomodate requesting removals
+			for (uint8_t i = 0; i < max_fruit; i++) {
+				if (condition[i] != -1) {	// Want to inspect changes over this round for all other moves
+					if (prev_fruit_presence[i] && !fruit_presence[i]) { // present previously but currently removed
+						// Penalty: every piece that was removed in the process, that didn't need to be removed, incurs 2pt penalty
+						if (apply_penalty) {
 							score -= 2;
+						}
+						else {
+							score -= 1;
 						}
 					}
 				}
