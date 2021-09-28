@@ -221,7 +221,7 @@ BakeryMode::BakeryMode() : scene(*tart_scene) {
 			YesMelons = 10,
 			YesRedFruit = 11,
 			YesYellowFruit = 12,
-			YesGreenFruit = 13
+			YesGreenFruit = 13,
 		} InstrAlias;
 		
 		// Set-up game personalization randomization 
@@ -436,7 +436,6 @@ bool BakeryMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_siz
 
 void BakeryMode::update(float elapsed) {
 	if (game_over) return;
-	if (instr_ct > 3) return;
 
 	time += elapsed;
 
@@ -474,6 +473,11 @@ void BakeryMode::update(float elapsed) {
 		if ((phase == RECOVERY) && (time >= RECOVERY_TIME)) {
 			time = 0.0f;
 			phase = INSTRUCT;
+
+			// Copy current game state, to be checked after move period
+			for (uint8_t p_ind = 0; p_ind < fruit_presence.size(); p_ind++) {
+				prev_fruit_presence[p_ind] = fruit_presence[p_ind];
+			}
 			
 			// Play next instruction
 			relaxing_loop->set_volume(0.0f, 10.0f/60.0f);
@@ -494,13 +498,27 @@ void BakeryMode::update(float elapsed) {
 
 			// Check presence against instruction's conditions
 			auto condition = instructions.requirements[cur_instr_i];
+			bool apply_penalty = false;
 			for (uint8_t i = 0; i < max_fruit; i++) {
 				if (fruit_presence[i]) {
 					if (condition[i] == 1) {
 						score += 5;
 					}
 					else if (condition[i] == -1) {
+						// Failure to remove the required pieces incurs an additional penalty
+						apply_penalty = true;
 						score -= 5;
+					}
+				}
+			}
+
+			// Penalty: every piece that was removed in the process, that didn't need to be removed, incurs 2pt penalty
+			if (apply_penalty) {
+				for (uint8_t i = 0; i < max_fruit; i++) {
+					if (condition[i] != -1) {	// Want to inspect changes over this round for all other moves
+						if (prev_fruit_presence[i] && !fruit_presence[i]) { // present previously but currently removed
+							score -= 2;
+						}
 					}
 				}
 			}
@@ -509,7 +527,7 @@ void BakeryMode::update(float elapsed) {
 			boss_loop->set_volume(0.0f, 10.0f/60.0f);
 			relaxing_loop->set_volume(1.0f, 5.0f/60.0f);
 			
-			if (cur_instr_i < (num_insts-1)) {		// !TODO careful about upperbound (test this)
+			if (cur_instr_i < (num_insts-1)) {
 				cur_instr_i++;
 			}
 			else {

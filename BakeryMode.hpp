@@ -72,6 +72,9 @@ struct BakeryMode : Mode {
 	float tart_base_depth = 1.0f;
 	glm::vec3 hidden_fruit_pos;
 
+	std::array<bool, max_fruit>prev_fruit_presence;
+	std::array<bool, max_fruit>fruit_presence;
+
 	// Collisions/throwing constants
 	const float collision_delta = 1.5f;
 	const float speed = 20.0f;
@@ -87,17 +90,13 @@ struct BakeryMode : Mode {
 	std::shared_ptr<Sound::PlayingSample> relaxing_loop;
 	std::shared_ptr<Sound::PlayingSample> boss_loop;
 
-	static const uint8_t num_insts = 8;
+	static const uint8_t num_insts = 10;
 	struct InstructReqs {
 		std::vector<Load<Sound::Sample> *> samples;
 		std::vector<std::array<int8_t, max_fruit>> requirements;
 	};
 	InstructReqs instructions;
-
-	std::array<bool, max_fruit>fruit_presence;
-
 	uint8_t cur_instr_i = 0;
-	uint8_t instr_ct = 0;
 
 	enum Phase {
 		RECOVERY, 
@@ -108,7 +107,7 @@ struct BakeryMode : Mode {
 
 	const float RECOVERY_TIME = 5.0f;
 	const float INSTRUCT_TIME = 3.0f;
-	float MOVE_TIME = 8.0f;
+	float MOVE_TIME = 8.2f;
 
 	// Track total elapsed time between iteration phases
 	float time = -2.0f;		// start earlier than 0 to test
